@@ -6,8 +6,6 @@ library(dplyr)
 page2_ui <- function(id) {
   ns <- NS(id)  # Create a namespace for the module
   
-  
-  
   industry_choices <- c(
     "Cafes and Restaurants" = "Cafes and Restaurants",
     "Bars" = "Pubs, Taverns and Bars",
@@ -17,23 +15,13 @@ page2_ui <- function(id) {
   
   fluidPage(
     tags$head(
-      tags$link(rel = "stylesheet", type = "text/css", href = "css/style-page2.css"),
-      tags$script(HTML("
-      $(document).ready(function() {
-          $('#food-sidebar-collapse').on('click', function() {
-            $('#food-sidebar').toggleClass('food-sidebar-expanded food-sidebar-collapsed');
-            $('.food-toggle-button-container').toggleClass('food-expanded food-collapsed');
-            $('.food-map-panel').toggleClass('food-expanded food-collapsed');
-          });
-      });
-    "))
+      tags$link(rel = "stylesheet", type = "text/css", href = "css/style-page2.css")
     ),
     
-    # Remove fluidRow and use a direct container
+    # Main container with fixed layout
     div(class = "food-map-container",
-        # Sidebar
-        div(id = "food-sidebar",
-            class = "food-sidebar-expanded",
+        # Sidebar with fixed width
+        div(class = "food-sidebar",
             div(class = "food-input-container",
                 selectInput(
                   ns("food_industry_filter"),
@@ -66,22 +54,11 @@ page2_ui <- function(id) {
             )
         ),
         
-        # Toggle button
-        div(class = "food-toggle-button-container food-expanded",
-            actionButton(
-              "food-sidebar-collapse",
-              HTML("☰"),
-              class = "btn btn-light"
-            )
-        ),
-        
-        # Map panel
-        div(class = "food-map-panel food-expanded",
-            leafletOutput(ns("food_map"))
+        div(class = "food-map-panel",
+            leafletOutput(ns("page2_food_map"))
         )
     )
   )
-       
 }
 
 
@@ -211,7 +188,7 @@ food_map <- function(data, mean_longitude, mean_latitude) {
 page2_server <- function(id) {
   moduleServer(id, function(input, output, session) {
     
-    ns <- session$ns  # Use ns for namespacing if necessary
+    ns <- session$ns
     
     # Load and filter the dataset
     data <- read.csv("cleaned_cafes_restaurants_melbourne_cbd.csv")
@@ -219,27 +196,27 @@ page2_server <- function(id) {
     mean_latitude <- mean(data$latitude, na.rm = TRUE)
     mean_longitude <- mean(data$longitude, na.rm = TRUE)
     
-    observeEvent(input$industry_filter, {
-      updateCheckboxInput(session, "outdoor_seating", value = FALSE)
+    observeEvent(input$food_industry_filter, {
+      updateCheckboxInput(session, "food_outdoor_seating", value = FALSE)
     })
     
     # Reactive expression to filter data based on the input industry
     filtered_data <- reactive({
-      req(input$industry_filter)  # Ensure the industry filter is available
+      req(input$food_industry_filter)  # Use namespaced ID
       
       result <- data %>%
-        filter(industry_anzsic4_description == input$industry_filter)
+        filter(industry_anzsic4_description == input$food_industry_filter)
       
       # Apply search filter if search text is not empty
-      if (!is.null(input$shop_search) && input$shop_search != "") {
+      if (!is.null(input$food_shop_search) && input$food_shop_search != "") {
         result <- result %>%
-          filter(grepl(input$shop_search, trading_name, ignore.case = TRUE))
+          filter(grepl(input$food_shop_search, trading_name, ignore.case = TRUE))
       }
       
       # Apply outdoor seating filter if applicable
-      if (!is.null(input$outdoor_seating) && 
-          input$outdoor_seating && 
-          input$industry_filter %in% c("Cafes and Restaurants", "Pubs, Taverns and Bars", "Takeaway Food Services", "Bakery Product Manufacturing (Non-factory based)")) {
+      if (!is.null(input$food_outdoor_seating) && 
+          input$food_outdoor_seating && 
+          input$food_industry_filter %in% c("Cafes and Restaurants", "Pubs, Taverns and Bars", "Takeaway Food Services", "Bakery Product Manufacturing (Non-factory based)")) {
         result <- result %>%
           filter(grepl("Outdoor", seating_type, ignore.case = TRUE))
       }
@@ -247,16 +224,14 @@ page2_server <- function(id) {
       result
     })
     
-    output$map <- renderLeaflet({
+    output$page2_food_map <- renderLeaflet({
       data_to_display <- filtered_data()
       
       # Check if filtered data is empty
       if (nrow(data_to_display) == 0) {
-        # Call food_map with an empty data frame and use the mean coordinates
         food_map(data.frame(longitude = numeric(0), latitude = numeric(0)), 
                  mean_longitude, mean_latitude)  
       } else {
-        # Call food_map with the filtered data
         food_map(data_to_display, mean_longitude, mean_latitude)  
       }
     })
