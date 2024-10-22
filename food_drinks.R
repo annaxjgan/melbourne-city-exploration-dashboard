@@ -15,47 +15,98 @@ page2_ui <- function(id) {
   
   fluidPage(
     tags$head(
-      tags$link(rel = "stylesheet", type = "text/css", href = "css/style-page2.css")
+      tags$link(rel = "stylesheet", type = "text/css", href = "style.css") ,
+      tags$style(HTML("
+      .map-container {
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+      }
+     .map-food-panel {
+        flex-grow: 1; 
+        height: 100%; 
+      }
+
+      
+      
+      .input-with-label {
+      display: flex;
+       align-items: center;
+       max-width:300px;
+      
+      }
+
+    .input-label {
+       font-size:15px;
+       color: #34495e;
+       font-weight: bold; 
+        margin-right:4px;
+    
+      }
+      .food-checkbox label{
+      font-size:15px;
+       color: #34495e;
+        font-weight: bold; 
+        margin-top:14px;
+      }
+     
+      #food-sidebar{
+        width:100%;
+        padding:1rem 10rem 1rem 10rem;
+        background-color: #f5f5f5;
+        border-top: 1px solid #e3e3e3; 
+        border-right: 1px solid #e3e3e3; 
+        border-left: 1px solid #e3e3e3; 
+        display: flex;
+        flex-direction: row;
+        border-radius:6px 6px 0 0;
+        justify-content: space-evenly;
+        z-index:999;
+      }
+    "))
+    
     ),
     
-    # Main container with fixed layout
-    div(class = "food-map-container",
-        # Sidebar with fixed width
-        div(class = "food-sidebar",
-            div(class = "food-input-container",
-                selectInput(
-                  ns("food_industry_filter"),
-                  "What you are looking for:",
-                  choices = industry_choices,
-                  selected = "Cafes and Restaurants",
-                  multiple = FALSE
-                )
+    
+    div(class = "map-container",
+        div(id = "food-sidebar",
+            
+                div(class = "input-with-label",
+                    tags$span(class = "input-label", "Select:"),
+                    selectInput(
+                      ns("industry_filter"),
+                      "",
+                      choices = industry_choices,
+                      selected = "Cafes and Restaurants",
+                      multiple = FALSE
+                    )
+                
+            ), 
+            
+                div(class = "input-with-label",
+                    tags$span(class = "input-label", "Search:"),
+                    textInput(
+                      inputId = ns("shop_search"),
+                      label = "",
+                      placeholder = "Enter shop name"
+                    )
+                
             ),
-            div(class = "food-input-container",
-                textInput(
-                  inputId = ns("food_shop_search"),
-                  label = "Search:",
-                  placeholder = "Enter shop name"
+            div(class = "food-checkbox",
+            
+                checkboxInput(
+                  ns("outdoor_seating"),
+                  "Outdoor Seating Available",
+                  value = FALSE
                 )
-            ),
-            conditionalPanel(
-              condition = sprintf(
-                "input['%s'] == 'Cafes and Restaurants' || input['%s'] == 'Pubs, Taverns and Bars'",
-                ns("food_industry_filter"),
-                ns("food_industry_filter")
-              ),
-              div(class = "food-checkbox-container",
-                  checkboxInput(
-                    ns("food_outdoor_seating"),
-                    "Outdoor Seating Available",
-                    value = FALSE
-                  )
-              )
+            
             )
+        
         ),
         
-        div(class = "food-map-panel",
-            leafletOutput(ns("page2_food_map"))
+        # Map panel remains static without expansion/collapse functionality
+        div(class = "map-food-panel",
+            leafletOutput(ns("map"), height = "720px")
         )
     )
   )
@@ -83,28 +134,20 @@ food_map <- function(data, mean_longitude, mean_latitude) {
   if (nrow(data) == 0) {
     # Return an empty map view centered on the mean coordinates
     leaflet(options = leafletOptions(zoomControl = FALSE)) %>%
-      addTiles(
-        url = paste0("https://api.mapbox.com/styles/v1/mapbox/streets-v12/tiles/{z}/{x}/{y}?access_token=", mapbox_token),
-        attribution = 'Tiles &copy; <a href="https://www.mapbox.com/">Mapbox</a>',
-        options = tileOptions(minZoom = 15, maxZoom = 18)
-      ) %>%
+      addProviderTiles(providers$CartoDB.Positron, options = tileOptions(minZoom = 15, maxZoom = 18)) %>%
       setView(lng = mean_longitude, lat = mean_latitude, zoom = 15)
   } else {
     first_instance <- data$industry_anzsic4_description[1]
     
     icons <- icons(
       iconUrl = sapply(data$industry_anzsic4_description, get_icon),  
-      iconWidth = 25, 
-      iconHeight = 25,
+      iconWidth = 27, 
+      iconHeight = 27,
       className = get_icon(first_instance)
     )
     
     leaflet(data, options = leafletOptions(zoomControl = FALSE)) %>%
-      addTiles(
-        url = paste0("https://api.mapbox.com/styles/v1/mapbox/streets-v12/tiles/{z}/{x}/{y}?access_token=", mapbox_token),
-        attribution = 'Tiles &copy; <a href="https://www.mapbox.com/">Mapbox</a>',
-        options = tileOptions(minZoom = 15,maxZoom = 18)  
-      ) %>%
+      addProviderTiles(providers$CartoDB.Positron, options = tileOptions(minZoom = 15, maxZoom = 18)) %>%
       addMarkers(
         lng = ~longitude,
         lat = ~latitude,
@@ -122,42 +165,52 @@ food_map <- function(data, mean_longitude, mean_latitude) {
     var childCount = cluster.getChildCount();
     var markers = cluster.getAllChildMarkers();
     var iconPath = markers[0].options.icon.options.className;  // Updated path
-    var size = '24'; // Default size
+    var size = '27'; // Default size
 
     // Determine the icon size based on the number of markers in the cluster
     if (iconPath === 'img/restaurant-svgrepo-com.svg') {
       if (childCount > 100) {
-        size = 45; // Large icon size
+        size = 50; // Large icon size
       } else if (childCount > 80) {
-        size = 40; // Medium-Large icon size
+        size = 45; // Medium-Large icon size
       } else if (childCount > 50) {
-        size = 35; // Medium icon size
+        size = 39; // Medium icon size
       } else if (childCount > 14) {
-        size = 31; // Small-Medium icon size
-      } else if (childCount > 3) {
+        size = 35; // Small-Medium icon size
+      } else if (childCount > 5) {
+        size = 32; // Small size
+      }else if (childCount > 3) {
         size = 29; // Small size
       }
     } else if (iconPath ===  'img/takeaway-svgrepo-com.svg' ) {
       if (childCount > 35) {
-        size = 45; // Larger size for this industry
+        size = 48; 
       } else if (childCount > 20) {
-        size = 40; // Medium-Large size
-      } else if (childCount > 5) {
-        size = 32; // Smaller size for fewer counts
+        size = 44; 
+      }  else if (childCount > 10) {
+        size = 40; 
+      }else if (childCount > 6) {
+        size = 36; 
+      }else if (childCount > 3) {
+        size = 33; 
       }
     } else if (iconPath === 'img/cocktail-svgrepo-com.svg'  ) {
       if (childCount > 15) {
-        size = 52; // Larger size for this industry
-      } else if (childCount > 8) {
-        size = 48; // Medium-Large size
-      } else if (childCount > 3) {
-        size = 43; // Smaller size for fewer counts
+        size = 56; 
+      } else if (childCount > 10) {
+        size = 52; 
+      } else if (childCount > 7) {
+        size = 48; 
+      }else if (childCount > 4) {
+        size = 40; 
+      }else if (childCount > 2) {
+        size = 37; 
       } else{
         size = 35;
       }
     }
     else if (iconPath === 'img/chocolate-roll-bakery-svgrepo-com.svg'){
-      size = 38;
+      size = 42;
     }
 
     // Return the image element for the cluster icon
@@ -190,33 +243,31 @@ page2_server <- function(id) {
     
     ns <- session$ns
     
-    # Load and filter the dataset
     data <- read.csv("cleaned_cafes_restaurants_melbourne_cbd.csv")
     
     mean_latitude <- mean(data$latitude, na.rm = TRUE)
     mean_longitude <- mean(data$longitude, na.rm = TRUE)
     
-    observeEvent(input$food_industry_filter, {
-      updateCheckboxInput(session, "food_outdoor_seating", value = FALSE)
+    observeEvent(input$industry_filter, {
+      updateCheckboxInput(session, "outdoor_seating", value = FALSE)
+      updateTextInput(session, "shop_search", value = "") 
     })
     
     # Reactive expression to filter data based on the input industry
     filtered_data <- reactive({
-      req(input$food_industry_filter)  # Use namespaced ID
+      req(input$industry_filter)  # Ensure the industry filter is available
       
       result <- data %>%
-        filter(industry_anzsic4_description == input$food_industry_filter)
+        filter(industry_anzsic4_description == input$industry_filter)
       
       # Apply search filter if search text is not empty
-      if (!is.null(input$food_shop_search) && input$food_shop_search != "") {
+      if (!is.null(input$shop_search) && input$shop_search != "") {
         result <- result %>%
-          filter(grepl(input$food_shop_search, trading_name, ignore.case = TRUE))
+          filter(grepl(input$shop_search, trading_name, ignore.case = TRUE))
       }
       
-      # Apply outdoor seating filter if applicable
-      if (!is.null(input$food_outdoor_seating) && 
-          input$food_outdoor_seating && 
-          input$food_industry_filter %in% c("Cafes and Restaurants", "Pubs, Taverns and Bars", "Takeaway Food Services", "Bakery Product Manufacturing (Non-factory based)")) {
+      if (!is.null(input$outdoor_seating) && 
+          input$outdoor_seating) {
         result <- result %>%
           filter(grepl("Outdoor", seating_type, ignore.case = TRUE))
       }
@@ -224,14 +275,16 @@ page2_server <- function(id) {
       result
     })
     
-    output$page2_food_map <- renderLeaflet({
+    output$map <- renderLeaflet({
       data_to_display <- filtered_data()
       
       # Check if filtered data is empty
       if (nrow(data_to_display) == 0) {
+        # Call food_map with an empty data frame and use the mean coordinates
         food_map(data.frame(longitude = numeric(0), latitude = numeric(0)), 
                  mean_longitude, mean_latitude)  
       } else {
+        # Call food_map with the filtered data
         food_map(data_to_display, mean_longitude, mean_latitude)  
       }
     })
