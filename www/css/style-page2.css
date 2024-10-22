@@ -1,0 +1,77 @@
+.food-map-container {
+  position: fixed;
+  top: 180px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  margin: 0 2rem 2rem 2rem;
+  border-radius: 5px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+#food-sidebar {
+  height: 100%;
+  transition: all 0.3s ease;
+  z-index: 1000;
+  background-color: #ddd;
+  overflow-y: auto;
+}
+
+.food-sidebar-expanded {
+  width: 280px;
+  padding: 20px;
+  border-right: 1px solid #ddd;
+}
+
+.food-sidebar-collapsed {
+  width: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+.food-toggle-button-container {
+  position: fixed;
+  left: 200px;
+  top: 180px;
+  z-index: 1001;
+  background: white;
+  border-radius: 4px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  transition: left 0.3s ease;
+}
+
+.food-toggle-button-container.food-collapsed {
+  left: 10px;
+}
+
+.food-toggle-button-container.food-expanded {
+  left: 260px;
+}
+
+.food-map-panel {
+  flex-grow: 1;
+  height: 100%;
+  transition: margin-left 0.3s ease;
+}
+
+.food-map-panel.food-expanded {
+  margin-left: 0;
+  width:;
+  
+}
+
+.food-map-panel.food-collapsed {
+  margin-left: 0;
+  width:100%;
+}
+
+
+.food-input-container {
+  margin-top: 2.5rem;
+}
+
+.food-checkbox-container {
+  margin-top: 2.5rem;
+}

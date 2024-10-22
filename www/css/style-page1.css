@@ -1,0 +1,95 @@
+/* Tour sidebar styling */
+.tour-sidebar {
+  background-color: #343a40;
+  color: #ffffff;
+  padding: 15px; 
+  height: 100vh;
+  transition: width 0.3s;
+  overflow: hidden;
+}
+
+/* Tour sidebar panel title */
+.tour-sidebar .tour-panel-title {
+  color: #ffffff;
+}
+
+/* Tour headings */
+.tour-heading {
+  text-align: center;
+  color: #343a40;
+}
+
+/* Tour buttons */
+.tour-btn {
+  background-color: #1c4e80; 
+  color: white;
+}
+
+.tour-btn:hover {
+  background-color: #0056b3; 
+  color: white;
+}
+
+.tour-btn.disabled {
+  background-color: #6c757d;
+  color: #ffffff !important;
+  cursor: not-allowed; 
+}
+
+/* Tour wells */
+.tour-well {
+  margin-bottom: 20px; 
+}
+
+/* Tour input groups */
+.tour-input-group {
+  display: flex;
+  justify-content: space-between; 
+  align-items: center; 
+}
+
+.tour-input-group > input {
+  flex-shrink: 1; 
+}
+
+/* Tour title panel */
+.tour-title-panel {
+  text-align: center;
+  color: #1c4e80;
+}
+
+/* Tour description panel */
+.tour-description-panel {
+  max-height: 210px;
+  overflow-y: scroll;
+}
+
+/* Tour input group specific styles */
+.tour-input-group-full {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.tour-input-group-select {
+  flex: 1;
+  margin-right: 5px;
+}
+
+.tour-input-group-button {
+  flex-shrink: 0;
+}
+
+/* Tour center alignment */
+.tour-center-align {
+  text-align: center;
+}
+
+/* Tour map reset button container */
+.tour-reset-container {
+  position: absolute;
+  top: 10px;
+  right: 20px;
+  z-index: 1000;
+  height: 100%;
+}
