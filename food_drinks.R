@@ -38,30 +38,39 @@ page2_ui <- function(id) {
 
     .input-label {
        font-size:15px;
-       color: #34495e;
+       color: navy;
        font-weight: bold; 
-        margin-right:4px;
+        margin-right:8px;
+        margin-top:5px;
     
       }
       .food-checkbox label{
       font-size:15px;
-       color: #34495e;
+       color: navy;
         font-weight: bold; 
         margin-top:14px;
+      }
+      #food-inner-div{
+        display: flex;
+        flex-direction: row;
+        justify-content: space-evenly;
+        border-right: 1px solid #e3e3e3; 
+        border-left: 1px solid #e3e3e3; 
+        border-top: 1px solid #e3e3e3;
+        border-radius:6px 6px 0 0;
+        z-index:999;
+        padding: 0.5rem 9rem 0.5rem 9rem;
       }
      
       #food-sidebar{
         width:100%;
-        padding:1rem 10rem 1rem 10rem;
+        padding:1.2rem 1.2rem 0 1.2rem;
         background-color: #f5f5f5;
         border-top: 1px solid #e3e3e3; 
         border-right: 1px solid #e3e3e3; 
         border-left: 1px solid #e3e3e3; 
-        display: flex;
-        flex-direction: row;
-        border-radius:6px 6px 0 0;
-        justify-content: space-evenly;
-        z-index:999;
+        border-radius:8px 8px 0 0;
+        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
       }
     "))
     
@@ -70,7 +79,7 @@ page2_ui <- function(id) {
     
     div(class = "map-container",
         div(id = "food-sidebar",
-            
+            div(id = "food-inner-div",
                 div(class = "input-with-label",
                     tags$span(class = "input-label", "Select:"),
                     selectInput(
@@ -102,6 +111,7 @@ page2_ui <- function(id) {
             
             )
         
+        )
         ),
         
         # Map panel remains static without expansion/collapse functionality
