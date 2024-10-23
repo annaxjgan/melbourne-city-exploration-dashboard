@@ -105,12 +105,13 @@ tours_ui <- function() {
           color: #343a40;
         }
         .btn {
-          background-color: #1c4e80; 
+          background-color: navy; 
           color: white;
         }
         .btn:hover {
-          background-color: #0056b3; 
+          background-color: rgba(70, 130, 180, 065); 
           color: white;
+          transition: background-color 0.1s ease-in-out, color 0.1s ease-in-out;
         }
         .btn.disabled {
           background-color: #6c757d;
@@ -135,6 +136,35 @@ tours_ui <- function() {
         .description-panel {
           max-height:210px;
           overflow-y:scroll;
+        }
+        .marker-cluster-small {
+          background-color: rgba(173, 216, 230, 0.6) !important; 
+          color: #000 !important; /* Text color */
+        }
+        
+        .marker-cluster-small div {
+          background-color: rgba(173, 216, 230, 0.6) !important; 
+          color: #000 !important; /* Text color */
+        }
+        
+        .marker-cluster-medium {
+          background-color: rgba(70, 130, 180, 0.6) !important; 
+          color: #fff !important; /* Text color */
+        }
+        
+        .marker-cluster-medium div {
+          background-color: rgba(70, 130, 180, 065) !important; 
+          color: #fff !important; /* Text color */
+        }
+        
+        .marker-cluster-large {
+          background-color: rgba(0, 0, 139, 0.7) !important; 
+          color: #fff !important; /* Text color */
+        }
+        
+        .marker-cluster-large div {
+          background-color: rgba(0, 0, 139, 0.7) !important;
+          color: #fff !important; /* Text color */
         }
       "))
     ),
@@ -179,7 +209,7 @@ tours_ui <- function() {
         ),
       ),
       mainPanel(
-        leafletOutput("map", height = "720px"),
+        leafletOutput("map", height="100vh"),
         div(style = "position: absolute; top: 10px; right: 20px; z-index: 1000;  height: 100%;",  
             conditionalPanel(
               condition = "input.show_trail > 0 && output.showResetButton", 

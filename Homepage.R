@@ -57,7 +57,7 @@ ui <- fluidPage(
         margin-top: 20px; /* Space above buttons */
       }
       .image-button:hover {
-        box-shadow: 0 0 10px lightblue, 0 0 0px lightblue, 0 0 10px lightblue; /* Glow effect on hover */
+        box-shadow: 0 0 15px lightblue, 0 0 15px lightblue, 0 0 1px lightblue; /* Glow effect on hover */
         transform: translateY(-7px); /* Move the whole container up on hover */
       }
       .image-button {
@@ -91,11 +91,12 @@ ui <- fluidPage(
         color: #000000;
         margin-top: auto; /* Ensures the label stays at the bottom */
       }
-      .tab-content-container h3 {
-        color: #2c3e50;
-        font-weight: 500;
-        letter-spacing: 0.5px;
-      }
+      .tab-content-container {
+          flex:1;
+          display: flex;
+          flex-direction: column;
+          height: 100vh;
+        }
       .tabset-panel .nav-tabs {
         justify-content: center;
         border-bottom: 2px solid #bdc3c7;
@@ -103,7 +104,7 @@ ui <- fluidPage(
       .nav-tabs {
         display: flex;
         justify-content: center; /* Centering tabs */
-        border-bottom: none;
+        border-bottom: 2px solid #bdc3c7;
         margin-top: 20px;
       }
       .nav-tabs .nav-item {
