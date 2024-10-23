@@ -144,8 +144,8 @@ food_map <- function(data, mean_longitude, mean_latitude) {
   if (nrow(data) == 0) {
     # Return an empty map view centered on the mean coordinates
     leaflet(options = leafletOptions(zoomControl = FALSE)) %>%
-      addProviderTiles(providers$CartoDB.Positron, options = tileOptions(minZoom = 15, maxZoom = 18)) %>%
-      setView(lng = mean_longitude, lat = mean_latitude, zoom = 15)
+      addProviderTiles(providers$CartoDB.Positron, options = tileOptions(minZoom = 14, maxZoom = 18)) %>%
+      setView(lng = mean_longitude, lat = mean_latitude, zoom = 14)
   } else {
     first_instance <- data$industry_anzsic4_description[1]
     
@@ -157,7 +157,7 @@ food_map <- function(data, mean_longitude, mean_latitude) {
     )
     
     leaflet(data, options = leafletOptions(zoomControl = FALSE)) %>%
-      addProviderTiles(providers$CartoDB.Positron, options = tileOptions(minZoom = 15, maxZoom = 18)) %>%
+      addProviderTiles(providers$CartoDB.Positron, options = tileOptions(minZoom = 14, maxZoom = 18)) %>%
       addMarkers(
         lng = ~longitude,
         lat = ~latitude,
@@ -242,7 +242,7 @@ food_map <- function(data, mean_longitude, mean_latitude) {
       setView(
         lng = mean(data$longitude),
         lat = mean(data$latitude),
-        zoom = ifelse(nrow(data) == 1, 17, 15)
+        zoom = ifelse(nrow(data) == 1, 17, 14)
       )
   }
 }
