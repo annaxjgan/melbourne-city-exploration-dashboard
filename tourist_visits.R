@@ -221,7 +221,7 @@ tours_server <- function(input, output, session) {
   # Reactive value to track user data and visited sites
   user_data <- reactiveVal(NULL)
   # Initialize reactive values
-  visited <- reactiveVal(c())  # Tracks the list of visited sites
+  visited <- reactiveVal(list())  # Tracks the list of visited sites
   completed_challenges <- reactiveVal(list())  # Tracks completed challenges for each user
   
   # Update the leaderboard for the current user
@@ -252,7 +252,7 @@ tours_server <- function(input, output, session) {
   # Create a reactive output for the bar plot
   output$visited_plot <- renderPlot({
     req(input$username)  # Ensure a username is provided
-    visited_sites <- visited()
+    user_visited_sites <- visited()[[input$username]] %||% c()
     
     # Create a data frame of all tour types
     all_types <- distinct(cultural_sites %>% select(type))
@@ -260,7 +260,7 @@ tours_server <- function(input, output, session) {
     # Create a data frame of visited sites for the bar chart
     visited_data <- cultural_sites %>%
       group_by(type) %>%
-      summarise(count = sum(name %in% visited_sites), .groups = 'drop') %>%
+      summarise(count = sum(name %in% user_visited_sites), .groups = 'drop') %>%
       right_join(all_types, by = "type") %>%
       mutate(count = ifelse(is.na(count), 0, count)) %>%
       arrange(desc(count))
@@ -309,9 +309,15 @@ tours_server <- function(input, output, session) {
   observeEvent(input$start, {
     req(input$username)
     
-    # Set current user and reset visited challenges list for new user
+    # Set current user
     user_data(input$username)
-    visited(c())
+    
+    # Initialize or retrieve the user's visited sites
+    current_visited <- visited()
+    if (is.null(current_visited[[input$username]])) {
+      current_visited[[input$username]] <- c()
+      visited(current_visited)
+    }
     
     # Ensure the user is in the leaderboard with 0 points initially
     update_leaderboard(0)
@@ -333,32 +339,50 @@ tours_server <- function(input, output, session) {
     
     # Output the number of completed challenges in the UI
     output$progress <- renderText({
-      paste(input$username, "has started the challenge!", 
-            num_challenges_completed, "tour challenges completed.")
+      req(input$trail)
+      total_stops <- sum(cultural_sites$type == paste(input$trail, "tour"))
+      
+      user_visited_sites <- visited()[[input$username]] %||% c()
+      
+      visited_cleaned <- trimws(user_visited_sites)
+      cultural_names_cleaned <- trimws(cultural_sites$name)
+      visited_stops <- sum(cultural_names_cleaned %in% visited_cleaned & cultural_sites$type == paste(input$trail, "tour"))
+      paste("You have completed", visited_stops, "out of", total_stops, "stops for the", input$trail, ".")
     })
   })
   
-  
   # Handle the "Mark as visited" button click event
   observeEvent(input$visit_site, {
-    req(input$visit_site)  # Ensure a site was clicked
+    req(input$visit_site)
+    current_user <- user_data()
     current_visited <- visited()
+    user_visited_sites <- current_visited[[current_user]] %||% c()
     
     # Ensure that the site is not already visited
-    if (!(input$visit_site %in% current_visited)) {
-      visited(c(current_visited, input$visit_site))  # Add site to visited list
-      update_leaderboard(1)  # Increment score by 1 for the current user
+    if (!(input$visit_site %in% user_visited_sites)) {
+      # Add site to user's visited sites
+      user_visited_sites <- c(user_visited_sites, input$visit_site)
+      current_visited[[current_user]] <- user_visited_sites
+      visited(current_visited)
       
-      # Update the progress after marking a site as visited
-      output$progress <- renderText({
-        req(input$trail)  # Ensure a trail is selected
-        total_stops <- sum(cultural_sites$type == paste(input$trail, "tour"))  # Total stops in selected trail
-        visited_cleaned <- trimws(visited())
-        cultural_names_cleaned <- trimws(cultural_sites$name)
-        visited_stops <- sum(cultural_names_cleaned %in% visited_cleaned & cultural_sites$type == paste(input$trail, "tour"))  # Visited stops in the trail
-        paste("You have completed", visited_stops, "out of", total_stops, "stops for the", input$trail, ".")
-      })
+      update_leaderboard(1)  # Increment score by 1 for the current user
     }
+    
+    output$progress <- renderText({
+      req(input$trail)
+      current_user <- user_data()
+      if (is.null(current_user) || current_user == "") {
+        return("Please enter your username and start the challenge.")
+      }
+      
+      total_stops <- sum(cultural_sites$type == paste(input$trail, "tour"))
+      user_visited_sites <- visited()[[current_user]] %||% c()
+      
+      visited_cleaned <- trimws(user_visited_sites)
+      cultural_names_cleaned <- trimws(cultural_sites$name)
+      visited_stops <- sum(cultural_names_cleaned %in% visited_cleaned & cultural_sites$type == paste(input$trail, "tour"))
+      paste("You have completed", visited_stops, "out of", total_stops, "stops for the", input$trail, ".")
+    })
   })
   
   # Show leaderboard modal
