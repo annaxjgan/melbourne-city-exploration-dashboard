@@ -28,6 +28,6 @@ install.packages(c(
 4. Click the "Run App" button in RStudio, or run the following command in the R console:
 
 ```R
-source("HomePage.R")
+runApp('Homepage.R')
 ```
 
