@@ -1,6 +1,8 @@
 library(shiny)
 source("tourist_visits.R")
 source("food_drinks.R")
+source("daily forecast.R")
+
 # Define UI
 ui <- fluidPage(
   
@@ -166,7 +168,7 @@ ui <- fluidPage(
       tabsetPanel(id = "main_tabs", 
                   tabPanel("Walking Tours", h3("Discover Melbourne's Best Walking Tours"), tours_ui() ),
                   tabPanel("Food & Drink", h3("Discover the Best Cafes, Restaurants, Bars, and More in Melbourne CBD"),page2_ui("food_tab")),
-                  tabPanel("Weather", h3("Get Real-time Weather Updates for Your Trip"))
+                  tabPanel("Weather", h3("Get Real-time Weather Updates for Your Trip"), weather_ui())
       ),
       height = "100vh"
     )
@@ -203,7 +205,8 @@ server <- function(input, output, session) {
   
   tours_server(input, output, session) 
   page2_server("food_tab")
+  weather_server(input,output,session)
 }
 
 # Run the application 
-shinyApp(ui = ui, server = server)
+shinyApp(ui = ui, server = server,options=list(launch.browser=TRUE))

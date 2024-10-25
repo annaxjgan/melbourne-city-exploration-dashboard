@@ -598,6 +598,3 @@ tours_server <- function(input, output, session) {
   })
   
 }
-
-# Run the application
-shinyApp(ui = tours_ui, server = tours_server)
