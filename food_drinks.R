@@ -163,11 +163,13 @@ food_map <- function(data, mean_longitude, mean_latitude) {
         lat = ~latitude,
         icon = icons,
         popup = ~paste0(
-          "<strong>", trading_name, "</strong><br>",
-          "Address: ", business_address, "<br>",
-          ifelse(grepl("outdoor", seating_type, ignore.case = TRUE), "Outdoor seats available", ""),
-          "<br>",
-          "Number of Seats: ", number_of_seats
+          "<div style='border: 1px solid #ccc; border-radius: 6px; padding: 4px; box-shadow: 0px 4px 7px rgba(0, 0, 0, 0.1); max-width: 250px;'>",
+          "<h4 style='margin-top: 0; color: #333;'>", trading_name, "</h4>",
+          "<p style='margin: 5px 0;'><strong>Address:</strong> ", business_address, "</p>",
+          ifelse(grepl("outdoor", seating_type, ignore.case = TRUE),
+                 "<p style='color: green; margin: 5px 0;'>🌿 Outdoor seats available</p>", ""),
+          "<p style='margin: 5px 0;'><strong>Number of Seats:</strong> ", number_of_seats, "</p>",
+          "</div>"
         ),
         clusterOptions = markerClusterOptions(
           iconCreateFunction = JS("
