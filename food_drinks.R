@@ -97,7 +97,7 @@ page2_ui <- function(id) {
                     textInput(
                       inputId = ns("shop_search"),
                       label = "",
-                      placeholder = "Enter shop name"
+                      placeholder = "Enter shop name or address"
                     )
                 
             ),
@@ -273,7 +273,8 @@ page2_server <- function(id) {
       # Apply search filter if search text is not empty
       if (!is.null(input$shop_search) && input$shop_search != "") {
         result <- result %>%
-          filter(grepl(input$shop_search, trading_name, ignore.case = TRUE))
+          filter(grepl(input$shop_search, trading_name, ignore.case = TRUE) |
+                   grepl(input$shop_search, building_address, ignore.case = TRUE))
       }
       
       if (!is.null(input$outdoor_seating) && 
