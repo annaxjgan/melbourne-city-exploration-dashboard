@@ -56,7 +56,7 @@ weather_ui <- function(){
   
   fluidRow(
     column(6, 
-           h3("Real-time weather information", align = "center"),
+           h4("Real-time weather information", align = "center"),
            textOutput("currentDateTime", inline = TRUE),
            leafletOutput("weatherMap", height = "90vh")
     ),
@@ -66,7 +66,7 @@ weather_ui <- function(){
              uiOutput("weather_info", style = "height: 45vh; overflow-y: scroll;")
            ),
            fluidRow(
-             h3("Melbourne Historical Temperature Data", align = "center"),
+             h4("Melbourne Historical Temperature Data", align = "center"),
              tags$div(class = 'tableauPlaceholder', id = 'viz1729490902543', style = 'position: relative; width: 100%; height: auto',
                       tags$noscript(a(href = '#', img(src = 'https://public.tableau.com/static/images/Hi/Historicaltemperature/Dashboard1/1_rss.png', alt = 'Tableau Visualization', style = 'border: none'))),
                       tags$object(class = 'tableauViz', style = 'width: 100%; height: 45vh; border: none;',
@@ -213,14 +213,7 @@ weather_server <- function(input, output, session) {
                    iconHeight = 40,
                    iconAnchorX = 15,
                    iconAnchorY = 30
-                 )) %>%
-      # Fit the bounds of the map to the markers
-      fitBounds(
-        lng1 = min(locations$lon), 
-        lat1 = min(locations$lat), 
-        lng2 = max(locations$lon), 
-        lat2 = max(locations$lat)
-      )
+                 ))
   })
   
   # Fetch and store forecast data for the first location on startup
@@ -430,7 +423,7 @@ weather_server <- function(input, output, session) {
       }
       
       output$weather_info <- renderUI({
-        forecast_html <- paste0("<h3 style='text-align:center;'>", location_name, " 7-day forecast</h4></br>", forecast_data)
+        forecast_html <- paste0("<h4 style='text-align:center;'>", location_name, " 7-day forecast</h4></br>", forecast_data)
         HTML(forecast_html)
       })
       
