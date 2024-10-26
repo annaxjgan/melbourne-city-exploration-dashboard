@@ -59,7 +59,7 @@ page2_ui <- function(id) {
         border-top: 1px solid #e3e3e3;
         border-radius:6px 6px 0 0;
         z-index:999;
-        padding: 0.5rem 9rem 0.5rem 9rem;
+        padding: 0.5rem 5rem 0.5rem 5rem;
       }
      
       #food-sidebar{
