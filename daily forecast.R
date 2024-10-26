@@ -357,7 +357,7 @@ weather_server <- function(input, output, session) {
       }
       
       output$weather_info <- renderUI({
-        forecast_html <- paste0("<h4 style='text-align:center;'>", location_name, " 7-day forecast</h4><br>", forecast_data)
+        forecast_html <- paste0("<h4 style='text-align:center;'>", location_name, " 7-day weather forecast</h4><br>", forecast_data)
         HTML(forecast_html)
       })
       
@@ -423,7 +423,7 @@ weather_server <- function(input, output, session) {
       }
       
       output$weather_info <- renderUI({
-        forecast_html <- paste0("<h4 style='text-align:center;'>", location_name, " 7-day forecast</h4></br>", forecast_data)
+        forecast_html <- paste0("<h4 style='text-align:center;'>", location_name, " 7-day weather forecast</h4></br>", forecast_data)
         HTML(forecast_html)
       })
       
