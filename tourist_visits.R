@@ -51,7 +51,7 @@ for (i in 1:nrow(tours_data)) {
   }
   
   # Generate site names for the current trail
-  site_names_temp <- paste(tours_data$name[i], "Stop", seq_along(latitudes_temp))
+  site_names_temp <- paste(tours_data$name[i], "- Stop", seq_along(latitudes_temp))
   
   # Accumulate information into main vectors
   for (k in seq_along(latitudes_temp)) {
@@ -89,13 +89,24 @@ tours_ui <- function() {
     tags$head(
       tags$link(rel = "stylesheet", type = "text/css", href = "styles.css"),
       tags$style(HTML("
+        .body{
+          height: 100vh; 
+        }
         .sidebar {
           background-color: #343a40;
           color: #ffffff;
           padding: 15px; 
-          height: 100vh;
           transition: width 0.3s;
-          overflow: hidden; /* Prevent overflow when collapsed */
+          overflow: auto;
+          display: flex; 
+          height: 100%; /* Full height */
+          overflow-y: auto; /* Allow vertical scroll if content exceeds */
+          flex: 0 0 300px;
+        }
+        .main-panel {
+          flex: 1; 
+          position: relative;
+          height = 100vh;
         }
         .sidebar .panel-title {
           color: #ffffff;
@@ -123,6 +134,8 @@ tours_ui <- function() {
         }
         .input-group {
           display: flex;
+          flex-direction: row;
+          flex-wrap: wrap;
           justify-content: space-between; 
           align-items: center; 
         }
@@ -168,53 +181,56 @@ tours_ui <- function() {
         }
       "))
     ),
-    sidebarLayout(
-      sidebarPanel(
-        id = "sidebar",
-        wellPanel(
-          h4("Walking Tour"),
-          div(class = "input-group", 
-              style = "display: flex; align-items: center; margin-bottom: 10px;",  # Center items vertically
-              div(style = "flex: 1; margin-right: 5px;",  # Allow the selectInput to grow
-                  selectInput("trail", "Select Walking Tour:", 
-                              choices = names(tourist_trails), 
-                              width = "100%")  # Full width for the selectInput
-              ),
-              actionButton("show_trail", "Show Trail", 
-                           style = "flex-shrink: 0;")  # Prevent button from shrinking
-          ),
-          div(
-            sliderInput("distance_filter", "Total journey distance (km)", 
-                        min = 1, max = 7, value = 7, step = 1)
-          )
-        ),
-        wellPanel(
-          h4("Join Tour Challenges"),
-          div(class = "input-group", 
-              textInput("username", "User Name:", value = ""),
-              actionButton("start", "Start")  # Keeping original sizing
-          )
-        ),
-        wellPanel(
-          h4("Challenge Progress"),
-          div(style = "text-align: center;",
-              textOutput("progress"))
-        ),
-        wellPanel(
-          h4("Leaderboard"),
-          div(style = "text-align: center;",  # Center alignment style
-              actionButton("show_leaderboard", "Show Leaderboard"), # Button to show leaderboard modal
-              actionButton("show_visited", "Show Sites Visited") # Button to show visited sites modal
-          )
-        ),
-      ),
-      mainPanel(
-        leafletOutput("map", height="100vh"),
-        div(style = "position: absolute; top: 10px; right: 20px; z-index: 1000;  height: 100%;",  
-            conditionalPanel(
-              condition = "input.show_trail > 0 && output.showResetButton", 
-              uiOutput("showResetButton") 
+    div(style = " height: 100vh;",
+      sidebarLayout(
+        sidebarPanel(
+          id = "sidebar",
+          wellPanel(
+            h4("Walking Tour"),
+            div(class = "input-group", 
+                style = "display: flex; align-items: center; margin-bottom: 10px;",  # Center items vertically
+                div(style = "flex: 1; margin-right: 5px;",  # Allow the selectInput to grow
+                    selectInput("trail", "Select Walking Tour:", 
+                                choices = names(tourist_trails), 
+                                width = "100%")  # Full width for the selectInput
+                ),
+                actionButton("show_trail", "Show Trail", 
+                             style = "flex-shrink: 0;")  # Prevent button from shrinking
+            ),
+            div(
+              sliderInput("distance_filter", "Total journey distance (km)", 
+                          min = 1, max = 7, value = 7, step = 1)
             )
+          ),
+          wellPanel(
+            h4("Join Tour Challenges"),
+            div(class = "input-group", 
+                textInput("username", "User Name:", value = ""),
+                actionButton("start", "Start")  # Keeping original sizing
+            )
+          ),
+          wellPanel(
+            h4("Challenge Progress"),
+            div(style = "text-align: center;",
+                textOutput("progress"))
+          ),
+          wellPanel(
+            h4("Leaderboard"),
+            div(style = "text-align: center;",  # Center alignment style
+                actionButton("show_leaderboard", "Show Leaderboard"), # Button to show leaderboard modal
+                actionButton("show_visited", "Show Sites Visited") # Button to show visited sites modal
+            )
+          ),
+        ),
+        mainPanel(
+          id = "main-panel",
+          leafletOutput("map", height= "100vh"),
+          div(style = "position: absolute; top: 10px; right: 20px; z-index: 1000;  height: 100%;",  
+              conditionalPanel(
+                condition = "input.show_trail > 0 && output.showResetButton", 
+                uiOutput("showResetButton") 
+              )
+          )
         )
       )
     )
@@ -228,6 +244,8 @@ tours_server <- function(input, output, session) {
   # Reactive value to track if the map is in its original state
   is_map_original <- reactiveVal(TRUE)
   
+  
+  
   # Output to show the Reset Button
   output$showResetButton <- renderUI({
     # Check the state and return the button if necessary
@@ -240,11 +258,31 @@ tours_server <- function(input, output, session) {
   
   # Leaflet output to show all data at the start
   output$map <- renderLeaflet({
+    createPopupContent <- function(name, type, stop_lat, stop_lon) {
+      # Initialize popup content with stop info
+      content <- paste0(
+        "<div style='text-align: center;'>", 
+        "<h4>", name, "</h4>"
+      )
+      
+      return(content)
+    }
+    
     leaflet(options = leafletOptions(minZoom=14)) %>%
       addProviderTiles(providers$CartoDB.Positron) %>%
       addAwesomeMarkers(data = cultural_sites, lng = ~lon, lat = ~lat, label = ~type, layerId = ~name, 
                         icon = awesomeIcons(library='fa', icon='star', markerColor = 'darkblue', iconColor = '#ffffff'),
-                        clusterOptions = markerClusterOptions()) %>%
+                        clusterOptions = markerClusterOptions(),
+                        popup = ~{
+                          mapply(function(lat, lon, name, type) {
+                            createPopupContent(name, type, lat, lon)
+                          },
+                          lat,
+                          lon,
+                          name,
+                          type,
+                          SIMPLIFY = FALSE)  # Ensure the output is a list of popups
+                        }) %>%
       setView(lng = mean(cultural_sites$lon), lat = mean(cultural_sites$lat), zoom = 14) 
   })
   
@@ -490,7 +528,7 @@ tours_server <- function(input, output, session) {
     createPopupContent <- function(name, type, stop_lat, stop_lon) {
       # Initialize popup content with stop info
       content <- paste0(
-        "<strong>Stop Name:</strong> ", name, "<br>",
+        "<h4>", name, "</h4>",
         "<strong>Type:</strong> ", type, "<br>"
       )
       
@@ -586,15 +624,35 @@ tours_server <- function(input, output, session) {
   #Reset the map
   observeEvent(input$reset_map, {
     is_map_original(TRUE)
+    createPopupContent <- function(name, type, stop_lat, stop_lon) {
+      # Initialize popup content with stop info
+      content <- paste0(
+        "<div style='text-align: center;'>", 
+        "<h4>", name, "</h4>"
+      )
+      
+      return(content)
+    }
+    
+
     leafletProxy("map") %>%
       clearMarkers() %>%
       clearShapes() %>%
       addProviderTiles(providers$CartoDB.Positron) %>%
-      addMarkers(data = cultural_sites, lng = ~lon, lat = ~lat, label = ~type, layerId = ~name,clusterOptions = markerClusterOptions()) %>%
-      fitBounds(
-        lng1 = min(cultural_sites$lon), lat1 = min(cultural_sites$lat),
-        lng2 = max(cultural_sites$lon), lat2 = max(cultural_sites$lat)
-      )
+      addAwesomeMarkers(data = cultural_sites, lng = ~lon, lat = ~lat, label = ~type, layerId = ~name, 
+                        icon = awesomeIcons(library='fa', icon='star', markerColor = 'darkblue', iconColor = '#ffffff'),
+                        clusterOptions = markerClusterOptions(),
+                        popup = ~{
+                          mapply(function(lat, lon, name, type) {
+                            createPopupContent(name, type, lat, lon)
+                          },
+                          lat,
+                          lon,
+                          name,
+                          type,
+                          SIMPLIFY = FALSE)  # Ensure the output is a list of popups
+                        }) %>%
+      setView(lng = mean(cultural_sites$lon), lat = mean(cultural_sites$lat), zoom = 14)
   })
   
 }
