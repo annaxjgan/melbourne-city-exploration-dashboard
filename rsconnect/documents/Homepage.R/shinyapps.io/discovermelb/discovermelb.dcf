@@ -1,0 +1,12 @@
+name: info_vis_assignment3
+title: discovermelb
+username: discovermelb
+account: discovermelb
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 13152561
+bundleId: 9280352
+url: https://annagan.shinyapps.io/info_vis_assignment3/
+version: 1
+asMultiple: FALSE
+asStatic: FALSE

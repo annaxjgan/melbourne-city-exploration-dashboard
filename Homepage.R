@@ -1,4 +1,6 @@
 library(shiny)
+rsconnect::setAccountInfo(name='annagan', token='E4C9304FC360AF754F0304FA7E3C843F', secret='sQlDjgeXHumGgHzEchOQKyQ/iASZi4ePyj/gH7bC')
+library(rsconnect)
 source("tourist_visits.R")
 source("food_drinks.R")
 source("daily forecast.R")
