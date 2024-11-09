@@ -1,3 +1,5 @@
+### Demo link: https://annagan.shinyapps.io/discovermelb/
+
 ## Guide for running the interface
 
 ### Step 1: Install Required R Packages
